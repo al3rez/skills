@@ -1,0 +1,4 @@
+interface:
+  display_name: "zmx Worktree"
+  short_description: "Create persistent worktree sessions with zmx"
+  default_prompt: "Use $zmx-worktree to create a worktree and persistent zmx session for this repository, following my local sessionizer conventions."

@@ -3,7 +3,7 @@
 Reusable agent skills for Claude Code, Codex, and other clients that support the
 [Agent Skills format](https://agentskills.io/specification).
 
-## Install Laws of UX
+## Install a skill
 
 Install for **Claude Code and Codex**, across your projects:
 
@@ -11,8 +11,16 @@ Install for **Claude Code and Codex**, across your projects:
 npx --yes skills add al3rez/skills --skill laws-of-ux --agent claude-code codex --global --yes
 ```
 
-Requires Node.js 22.20 or later for the installer. The skill itself is Markdown
-and needs no runtime, API keys, MCP servers, or plugins.
+For **zmx Worktree**, use the same installer:
+
+```sh
+npx --yes skills add al3rez/skills --skill zmx-worktree --agent claude-code codex --global --yes
+```
+
+Requires Node.js 22.20 or later for the installer. Both skill packages contain
+Markdown instructions and optional client metadata. `laws-of-ux` has no runtime
+dependencies; `zmx-worktree` requires git and zmx on macOS or Linux, plus the
+selected coding client if you ask it to launch one.
 
 To choose other supported agents, including Cursor and Gemini CLI, run this from
 your project and select the clients you use:
@@ -41,6 +49,19 @@ $laws-of-ux review the onboarding flow and rank the most important friction
 Both clients can also select the skill automatically when the task matches its
 description. Other clients use their own skill invocation syntax.
 
+For zmx, use `/zmx-worktree` in Claude Code or `$zmx-worktree` in Codex. For example:
+
+```text
+/zmx-worktree create a worktree and session for this repository, then launch Claude Code
+```
+
+```text
+$zmx-worktree create a worktree and session for this repository, then launch Codex
+```
+
+Omit the launch request when you only need a persistent shell session. Creating
+a session does not automatically start a coding client or bypass its permissions.
+
 ### Manual installation
 
 Clone this repository and copy the **whole skill folder**, including its
@@ -57,8 +78,9 @@ cp -R skills/laws-of-ux ~/.agents/skills/
 ```
 
 For a project install, use `.claude/skills/` or `.agents/skills/` inside the target
-project. Use these copy commands for a fresh install; if `laws-of-ux` already
-exists, compare it first so you preserve any local edits.
+project. To install zmx manually, replace `skills/laws-of-ux` with
+`skills/zmx-worktree` in these commands. Use copy commands for a fresh install;
+if the target skill already exists, compare it first so you preserve local edits.
 
 Other Agent Skills clients can consume the same folder at their documented
 location. `agents/openai.yaml` provides optional Codex UI metadata; the shared
@@ -68,6 +90,7 @@ To update an installation managed by the skills CLI:
 
 ```sh
 npx --yes skills update laws-of-ux
+npx --yes skills update zmx-worktree
 ```
 
 ## Skills
@@ -91,34 +114,36 @@ diagnostic questions, practical design moves, and misapplications to avoid.
 The skill is an original operational synthesis based on the book. The full book
 and its illustrations are not included.
 
-### [zmx-worktree](.claude/skills/zmx-worktree/SKILL.md)
+### [zmx-worktree](skills/zmx-worktree/SKILL.md)
 
-Creates a git worktree plus a persistent zmx session
-in one step, following the conventions my `zmx-sessionizer` script expects, and
-optionally launches Claude Code inside it.
+Creates a git worktree plus a persistent zmx session, following a local
+`zmx-sessionizer` when present. Claude Code, Codex, or another shell-capable agent
+can use the skill; launching a coding client inside the session is optional.
 
 Worth reading even if you do not use zmx — it documents a few things that cost me
 real time to work out:
 
-- `zmx attach <name> <command>` silently drops the trailing command (as of 0.6.0),
-  so the session lands in the daemon's cwd instead of yours.
-- `start_dir` is recorded from the *client* cwd, which is how the sessionizer maps
-  directories to sessions. Create a session from the wrong directory and the picker
-  stops finding it.
+- The original 0.6.0 setup observed `zmx attach <name> <command>` dropping the
+  trailing command. The skill uses detached `run` from the worktree directory.
+- Directory metadata is version-dependent: 0.8.0 replaced `start_dir` with `cwd`.
+  A picker still expecting `start_dir` needs its own compatibility check.
 - In zsh, naming a shell variable `path` destroys `$PATH` mid-script — it is a
   special array tied to it.
-- Launching Claude from inside another Claude session needs
-  `CLAUDE_CODE_FORCE_SESSION_PERSISTENCE=1`, or the child inherits the child-session
-  marker and quietly stops saving transcripts.
+- The original nested-Claude setup needed
+  `CLAUDE_CODE_FORCE_SESSION_PERSISTENCE=1` to retain its own transcripts; this
+  local workaround does not apply to Codex.
 
 It also carries safety rules for not clobbering a session someone (or some agent) is
 working in.
+See [compatibility notes](skills/zmx-worktree/references/compatibility.md) for
+the version caveats. The legacy `.claude/skills/zmx-worktree` path is a symlink to
+the shared skill folder, keeping one source of truth.
 
 ## Notes
 
 `laws-of-ux` is client-neutral and has no machine-specific dependencies.
-`zmx-worktree` is written for my setup: worktrees under `~/Work/worktrees`, Homebrew
-paths, and zsh. Adjust those paths before using it on yours.
+`zmx-worktree` preserves my default layout under `~/Work/worktrees` while allowing
+the user's local sessionizer, paths, and installed shell to define their setup.
 
 Installation references: [skills CLI](https://github.com/vercel-labs/skills),
 [Claude Code skills](https://code.claude.com/docs/en/skills), and
