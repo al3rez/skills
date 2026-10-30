@@ -1,0 +1,4 @@
+interface:
+  display_name: "Laws of UX"
+  short_description: "Review and design UX using behavioral psychology"
+  default_prompt: "Use $laws-of-ux to assess this user journey, identify evidence-backed friction, and recommend focused improvements."
