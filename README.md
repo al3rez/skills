@@ -136,8 +136,7 @@ real time to work out:
 It also carries safety rules for not clobbering a session someone (or some agent) is
 working in.
 See [compatibility notes](skills/zmx-worktree/references/compatibility.md) for
-the version caveats. The legacy `.claude/skills/zmx-worktree` path is a symlink to
-the shared skill folder, keeping one source of truth.
+the version caveats.
 
 ## Notes
 
